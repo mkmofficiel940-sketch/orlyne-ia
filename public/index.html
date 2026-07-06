@@ -38,27 +38,39 @@
   .screen { display: none; flex-direction: column; height: 100dvh; }
   .screen.active { display: flex; }
 
-  #homeScreen { align-items: center; padding: 30px 20px 90px; overflow-y: auto; position: relative; }
+    .homeTopBar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 0;
+    width: 100%;
+    }
+  .homeTopBar button { background: none; border: none; font-size: 22px; color: var(--text-color); }
+
+  #homeScreen { align-items: center; padding: 0 20px 90px; overflow-y: auto; position: relative; }
   .home-avatar {
     width: 90px; height: 90px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     display: flex; align-items: center; justify-content: center;
-    font-size: 40px; margin-top: 20px;
+    font-size: 40px; margin-top: 10px;
     box-shadow: 0 0 30px rgba(124,58,237,0.5);
   }
   .home-title { margin-top: 16px; font-size: 1.4em; font-weight: bold; }
   .home-sub { color: var(--text-muted); margin-top: 6px; font-size: 0.9em; text-align: center; }
-  .grid { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
+  .grid { margin-top: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
   .grid-btn {
     background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
-    padding: 18px 8px; display: flex; flex-direction: column; align-items: center;
+    padding: 16px 8px; display: flex; flex-direction: column; align-items: center;
     gap: 8px; font-size: 0.8em; color: var(--text-color);
   }
-  .grid-btn .icon { font-size: 26px; }
+  .grid-icon-circle {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .homeInputArea {
+    width: 100%; display: flex; gap: 8px; margin-top: 20px;
+  }
 
   .crownBtn {
-    position: absolute; top: 16px; right: 16px; font-size: 24px;
-    background: none; border: none;
+    font-size: 22px; background: none; border: none;
   }
   .bottomNav {
     position: absolute; bottom: 0; left: 0; right: 0;
@@ -109,6 +121,10 @@
   .actionBtn {
     margin: 12px 16px; padding: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: white; border: none; border-radius: 12px; font-size: 1em; font-weight: bold;
+  }
+  .outlineBtn {
+    margin: 6px 16px; padding: 14px; background: transparent; border: 1px solid var(--border-color);
+    color: var(--accent); border-radius: 12px; font-size: 1em; font-weight: bold;
   }
   .fieldLabel { padding: 12px 16px 0; font-size: 0.8em; color: var(--text-muted); }
   .langRow { display: flex; gap: 8px; padding: 12px 16px; }
@@ -173,25 +189,36 @@
   .statIcon { font-size: 28px; }
   .statValue { font-size: 1.3em; font-weight: bold; color: var(--accent); }
   .statLabel { font-size: 0.8em; color: var(--text-muted); }
+
+  .menuHeader { display:flex; flex-direction:column; align-items:center; padding: 30px 20px; border-bottom: 1px solid var(--border-color); }
+  .menuHeader .avatar { width:60px; height:60px; font-size:26px; margin-bottom:10px; }
 </style>
 </head>
 <body>
 
 <div class="screen active" id="homeScreen">
-  <button class="crownBtn" onclick="alert('✨ Version Premium bientôt disponible !')">👑</button>
+  <div class="homeTopBar">
+    <button onclick="showScreen('menuScreen')">☰</button>
+    <div class="home-title" style="margin:0; font-size:1.1em;">ORLYNE <span style="color:var(--accent);">BOT AI</span></div>
+    <button class="crownBtn" onclick="alert('✨ Version Premium bientôt disponible !')">👑</button>
+  </div>
   <div class="home-avatar">🤖</div>
   <div class="home-title" id="homeGreeting">Bonjour ! 👋</div>
   <div class="home-sub">Comment puis-je vous aider aujourd'hui ?</div>
   <div class="grid">
-    <div class="grid-btn" onclick="showScreen('chatScreen')"><span class="icon">💬</span>Discussion</div>
-    <div class="grid-btn" onclick="showScreen('memoryScreen'); loadMemory();"><span class="icon">📖</span>Mémoire</div>
-    <div class="grid-btn" onclick="showScreen('codeScreen')"><span class="icon">💻</span>Code</div>
-    <div class="grid-btn" onclick="showScreen('translateScreen')"><span class="icon">🌐</span>Traduction</div>
-    <div class="grid-btn" onclick="showScreen('summaryScreen')"><span class="icon">📄</span>Résumé</div>
-    <div class="grid-btn" onclick="showScreen('imageScreen')"><span class="icon">🖼️</span>Images</div>
-    <div class="grid-btn" onclick="showScreen('voiceScreen')"><span class="icon">🎤</span>Voix</div>
-    <div class="grid-btn" onclick="showScreen('settingsScreen')"><span class="icon">⚙️</span>Paramètres</div>
-    <div class="grid-btn" onclick="showScreen('filesScreen'); loadFiles();"><span class="icon">🕒</span>Historique</div>
+    <div class="grid-btn" onclick="showScreen('chatScreen')"><div class="grid-icon-circle" style="background:#7c3aed">💬</div>Discussion</div>
+    <div class="grid-btn" onclick="showScreen('memoryScreen'); loadMemory();"><div class="grid-icon-circle" style="background:#2563eb">📖</div>Mémoire</div>
+    <div class="grid-btn" onclick="showScreen('codeScreen')"><div class="grid-icon-circle" style="background:#16a34a">💻</div>Code</div>
+    <div class="grid-btn" onclick="showScreen('translateScreen')"><div class="grid-icon-circle" style="background:#ea580c">🌐</div>Traduction</div>
+    <div class="grid-btn" onclick="showScreen('summaryScreen')"><div class="grid-icon-circle" style="background:#ca8a04">📄</div>Résumé</div>
+    <div class="grid-btn" onclick="showScreen('imageScreen')"><div class="grid-icon-circle" style="background:#c026d3">🖼️</div>Images</div>
+    <div class="grid-btn" onclick="showScreen('voiceScreen')"><div class="grid-icon-circle" style="background:#db2777">🎤</div>Voix</div>
+    <div class="grid-btn" onclick="showScreen('settingsScreen')"><div class="grid-icon-circle" style="background:#4b5563">⚙️</div>Paramètres</div>
+    <div class="grid-btn" onclick="showScreen('filesScreen'); loadFiles();"><div class="grid-icon-circle" style="background:#0d9488">🕒</div>Historique</div>
+  </div>
+  <div class="homeInputArea">
+    <input type="text" class="textInput roundInput" id="homeInput" placeholder="Tapez votre message...">
+    <button class="sendBtn" onclick="sendFromHome()">➤</button>
   </div>
   <div class="bottomNav">
     <button class="navItem active"><span class="navIcon">🏠</span>Accueil</button>
@@ -199,6 +226,25 @@
     <button class="navItem" onclick="showScreen('imageScreen')"><span class="navIcon">🛠️</span>Outils</button>
     <button class="navItem" onclick="showScreen('settingsScreen')"><span class="navIcon">👤</span>Profil</button>
   </div>
+</div>
+
+<div class="screen" id="menuScreen">
+  <div class="menuHeader">
+    <div class="avatar">🤖</div>
+    <div style="font-weight:bold;" id="menuGreeting">Bonjour ! 👋</div>
+    <div style="color:var(--text-muted); font-size:0.8em;">Orlyne IA</div>
+  </div>
+  <div class="body-area" style="padding-top:10px;">
+    <div class="settingRow" onclick="showScreen('homeScreen')"><span>🏠 Accueil</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showScreen('memoryScreen'); loadMemory();"><span>📖 Mémoire</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showScreen('filesScreen'); loadFiles();"><span>📁 Fichiers</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showScreen('statsScreen'); loadStats();"><span>📊 Statistiques</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showScreen('settingsScreen')"><span>⚙️ Paramètres</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="contactSupport()"><span>📞 Support</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="openChannel()"><span>💬 Chaîne WhatsApp</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showAbout()"><span>ℹ️ À propos</span><span class="arrow">›</span></div>
+  </div>
+  <button class="outlineBtn" onclick="showScreen('homeScreen')">← Retour</button>
 </div>
 
 <div class="screen" id="chatScreen">
@@ -268,6 +314,7 @@
 <div class="screen" id="memoryScreen">
   <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">📖</div><h1>Mémoire</h1></header>
   <div class="body-area" id="memoryBody"><div class="welcome">Chargement...</div></div>
+  <button class="outlineBtn" onclick="exportConversations()">⬇️ Exporter en .txt</button>
   <button class="actionBtn" onclick="clearMemory()">Tout effacer</button>
 </div>
 
@@ -318,7 +365,7 @@
       <span>Taille du texte</span>
       <select id="fontSizeSelect" onchange="setFontSize(this.value)">
         <option value="14px">Petit</option>
-        <option value="16px">Moyen</option>
+    <option value="16px">Moyen</option>
         <option value="19px">Grand</option>
       </select>
     </div>
@@ -394,6 +441,16 @@ function incrementStat(key) {
   localStorage.setItem('orlyne_stats', JSON.stringify(stats));
 }
 
+function sendFromHome() {
+  const homeInput = document.getElementById('homeInput');
+  const message = homeInput.value.trim();
+  if (!message) return;
+  showScreen('chatScreen');
+  document.getElementById('chatInput').value = message;
+  homeInput.value = '';
+  sendChat();
+}
+
 async function sendChat() {
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
@@ -409,6 +466,7 @@ async function sendChat() {
   } catch (e) { loading.textContent = 'Erreur de connexion'; }
 }
 document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendChat(); });
+document.getElementById('homeInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendFromHome(); });
 
 function setTheme(mode) {
   document.body.className = mode === 'light' ? 'light' : '';
@@ -465,6 +523,29 @@ setInterval(() => {
   stats.timeSpent = (stats.timeSpent || 0) + 10;
   localStorage.setItem('orlyne_stats', JSON.stringify(stats));
 }, 10000);
+
+async function exportConversations() {
+  try {
+    const res = await fetch('/api/history');
+    const data = await res.json();
+    if (!data.history || data.history.length === 0) {
+      alert('Aucune conversation à exporter.');
+      return;
+    }
+    let content = 'Conversations Orlyne IA\nExporté le ' + new Date().toLocaleString('fr-FR') + '\n\n';
+    data.history.forEach(m => {
+      const who = m.role === 'user' ? 'Moi' : 'Orlyne';
+      content += who + ' : ' + m.content + '\n\n';
+    });
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conversations_orlyne.txt'; a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Erreur lors de l\'export.');
+  }
+}
 
 async function sendCode() {
   const input = document.getElementById('codeInput');
@@ -753,6 +834,7 @@ function saveUsername() {
   if (!name) return;
   localStorage.setItem('orlyne_username', name);
   document.getElementById('homeGreeting').textContent = 'Bonjour, ' + name + ' 👋';
+  document.getElementById('menuGreeting').textContent = 'Bonjour, ' + name + ' 👋';
   alert('Nom enregistré : ' + name);
 }
 window.addEventListener('DOMContentLoaded', () => {
@@ -760,6 +842,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (saved) {
     document.getElementById('usernameInput').value = saved;
     document.getElementById('homeGreeting').textContent = 'Bonjour, ' + saved + ' 👋';
+    document.getElementById('menuGreeting').textContent = 'Bonjour, ' + saved + ' 👋';
   }
   loadAppearance();
 });
@@ -768,7 +851,7 @@ function checkUpdate() {
   alert("Tu utilises la dernière version (1.0.0). Aucune mise à jour disponible.");
 }
 function showChangelog() {
-  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Apparence personnalisable\n- Statistiques\n- Paramètres");
+  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Apparence personnalisable\n- Statistiques\n- Export conversations\n- Menu de navigation\n- Paramètres");
 }
 
 function pickSupportNumber() {

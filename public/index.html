@@ -7,13 +7,33 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7c3aed">
 <style>
+  :root {
+    --accent: #7c3aed;
+    --accent-dark: #6d28d9;
+    --bg-start: #0d0d1a;
+    --bg-end: #14102a;
+    --card-bg: #1a1a2e;
+    --border-color: #2a2a3d;
+    --text-color: #ffffff;
+    --text-muted: #999999;
+    --font-size-base: 16px;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    background: linear-gradient(180deg, #0d0d1a 0%, #14102a 100%);
-    color: white;
+    background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    color: var(--text-color);
     height: 100dvh;
     overflow: hidden;
+    font-size: var(--font-size-base);
+  }
+  body.light {
+    --bg-start: #f4f2fb;
+    --bg-end: #ffffff;
+    --card-bg: #ffffff;
+    --border-color: #e0dcf0;
+    --text-color: #1a1a2e;
+    --text-muted: #666666;
   }
   .screen { display: none; flex-direction: column; height: 100dvh; }
   .screen.active { display: flex; }
@@ -21,18 +41,18 @@
   #homeScreen { align-items: center; padding: 30px 20px 90px; overflow-y: auto; position: relative; }
   .home-avatar {
     width: 90px; height: 90px; border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     display: flex; align-items: center; justify-content: center;
     font-size: 40px; margin-top: 20px;
     box-shadow: 0 0 30px rgba(124,58,237,0.5);
   }
-  .home-title { margin-top: 16px; font-size: 22px; font-weight: bold; }
-  .home-sub { color: #999; margin-top: 6px; font-size: 14px; text-align: center; }
+  .home-title { margin-top: 16px; font-size: 1.4em; font-weight: bold; }
+  .home-sub { color: var(--text-muted); margin-top: 6px; font-size: 0.9em; text-align: center; }
   .grid { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
   .grid-btn {
-    background: #1a1a2e; border: 1px solid #2a2a3d; border-radius: 16px;
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
     padding: 18px 8px; display: flex; flex-direction: column; align-items: center;
-    gap: 8px; font-size: 13px; color: white;
+    gap: 8px; font-size: 0.8em; color: var(--text-color);
   }
   .grid-btn .icon { font-size: 26px; }
 
@@ -43,103 +63,108 @@
   .bottomNav {
     position: absolute; bottom: 0; left: 0; right: 0;
     display: flex; justify-content: space-around;
-    background: rgba(26,26,46,0.95); border-top: 1px solid #2a2a3d;
+    background: var(--card-bg); border-top: 1px solid var(--border-color);
     padding: 10px 0 14px;
   }
   .navItem {
     display: flex; flex-direction: column; align-items: center;
-    gap: 4px; font-size: 11px; color: #888; background: none; border: none;
+    gap: 4px; font-size: 11px; color: var(--text-muted); background: none; border: none;
   }
-  .navItem.active { color: #a78bfa; }
+  .navItem.active { color: var(--accent); }
   .navItem .navIcon { font-size: 20px; }
 
   header {
-    background: rgba(26,26,46,0.9); padding: 16px; display: flex;
-    align-items: center; gap: 10px; border-bottom: 1px solid #2a2a3d;
+    background: var(--card-bg); padding: 16px; display: flex;
+    align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color);
   }
-  .backBtn { font-size: 20px; background: none; border: none; color: white; }
+  .backBtn { font-size: 20px; background: none; border: none; color: var(--text-color); }
   .avatar {
     width: 36px; height: 36px; border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     display: flex; align-items: center; justify-content: center;
   }
-  header h1 { font-size: 18px; }
-  header h1 span { color: #a78bfa; }
+  header h1 { font-size: 1.1em; color: var(--text-color); }
+  header h1 span { color: var(--accent); }
 
   .body-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .welcome { text-align: center; margin-top: 40px; color: #888; }
+  .welcome { text-align: center; margin-top: 40px; color: var(--text-muted); }
   .msg {
     max-width: 85%; padding: 12px 16px; border-radius: 16px; line-height: 1.5;
-    white-space: pre-wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    white-space: pre-wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 1em;
   }
-  .user { align-self: flex-end; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-bottom-right-radius: 4px; }
-  .bot { align-self: flex-start; background: #1a1a2e; border: 1px solid #2a2a3d; border-bottom-left-radius: 4px; }
+  .user { align-self: flex-end; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; }
+  .bot { align-self: flex-start; background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
 
-  .inputArea { display: flex; padding: 12px; background: rgba(26,26,46,0.9); border-top: 1px solid #2a2a3d; gap: 8px; }
+  .inputArea { display: flex; padding: 12px; background: var(--card-bg); border-top: 1px solid var(--border-color); gap: 8px; }
   .textInput, textarea, select {
     flex: 1; padding: 14px; border-radius: 16px; border: none;
-    background: #0d0d1a; color: white; font-size: 16px; outline: none;
+    background: var(--bg-start); color: var(--text-color); font-size: 1em; outline: none;
     font-family: inherit;
   }
   .roundInput { border-radius: 24px; }
   .sendBtn {
-    padding: 0 22px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    padding: 0 22px; background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: white; border: none; border-radius: 24px; font-size: 16px; font-weight: bold;
   }
   .actionBtn {
-    margin: 12px 16px; padding: 14px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
+    margin: 12px 16px; padding: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: white; border: none; border-radius: 12px; font-size: 1em; font-weight: bold;
   }
-  .fieldLabel { padding: 12px 16px 0; font-size: 13px; color: #999; }
+  .fieldLabel { padding: 12px 16px 0; font-size: 0.8em; color: var(--text-muted); }
   .langRow { display: flex; gap: 8px; padding: 12px 16px; }
   #genImage { max-width: 100%; border-radius: 12px; margin-top: 10px; }
-  .loader { color: #999; font-style: italic; }
+  .loader { color: var(--text-muted); font-style: italic; }
   .codeCard {
-    background:#0d0d1a; border:1px solid #2a2a3d; border-radius:12px;
+    background: var(--bg-start); border:1px solid var(--border-color); border-radius:12px;
     padding:14px; margin-top:6px; font-family:'Courier New', monospace;
-    font-size:13px; white-space:pre-wrap; overflow-x:auto;
+    font-size:0.85em; white-space:pre-wrap; overflow-x:auto; color: var(--text-color);
   }
-  .cardLabel { font-size:12px; color:#a78bfa; font-weight:bold; margin-top:10px; }
+  .cardLabel { font-size:0.75em; color: var(--accent); font-weight:bold; margin-top:10px; }
   .smallBtn {
-    margin-top:8px; padding:8px 16px; background:#2a2a3d; color:#a78bfa;
-    border:none; border-radius:8px; font-size:13px; align-self:flex-start;
+    margin-top:8px; padding:8px 16px; background: var(--border-color); color: var(--accent);
+    border:none; border-radius:8px; font-size:0.8em; align-self:flex-start;
   }
 
   #voiceScreen { align-items: center; justify-content: center; }
   .micBtn {
     width: 110px; height: 110px; border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     border: none; color: white; font-size: 46px;
     box-shadow: 0 0 30px rgba(124,58,237,0.5);
   }
   .micBtn.listening { background: linear-gradient(135deg, #ef4444, #b91c1c); animation: pulse 1.2s infinite; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6);} 70% { box-shadow: 0 0 0 25px rgba(239,68,68,0);} 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0);} }
-  .voiceStatus { margin-top: 20px; color: #999; text-align: center; padding: 0 20px; }
-  .voiceTranscript { margin-top: 20px; padding: 14px 18px; background: #1a1a2e; border-radius: 16px; max-width: 85%; text-align: center; }
-  .voiceReply { margin-top: 14px; padding: 14px 18px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 16px; max-width: 85%; text-align: center; }
+  .voiceStatus { margin-top: 20px; color: var(--text-muted); text-align: center; padding: 0 20px; }
+  .voiceTranscript { margin-top: 20px; padding: 14px 18px; background: var(--card-bg); border-radius: 16px; max-width: 85%; text-align: center; color: var(--text-color); }
+  .voiceReply { margin-top: 14px; padding: 14px 18px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 16px; max-width: 85%; text-align: center; color: white; }
 
-  .sectionTitle { padding: 18px 16px 6px; font-size: 14px; color: #a78bfa; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sectionTitle { padding: 18px 16px 6px; font-size: 0.85em; color: var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
   .settingRow {
     display: flex; align-items: center; justify-content: space-between;
-    background: #1a1a2e; border: 1px solid #2a2a3d; border-radius: 12px;
-    padding: 14px 16px; margin: 6px 16px; font-size: 15px;
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
+    padding: 14px 16px; margin: 6px 16px; font-size: 0.9em; color: var(--text-color);
   }
-  .settingRow input[type=text] {
-    background: #0d0d1a; border: none; color: white; padding: 8px 12px;
-    border-radius: 8px; font-size: 14px; width: 55%;
+  .settingRow input[type=text], .settingRow select {
+    background: var(--bg-start); border: none; color: var(--text-color); padding: 8px 12px;
+    border-radius: 8px; font-size: 0.85em; width: 55%;
   }
-  .settingRow .arrow { color: #666; }
+  .settingRow .arrow { color: var(--text-muted); }
 
   .fileCard {
-    background:#1a1a2e; border:1px solid #2a2a3d; border-radius:12px;
-    padding:12px; margin:0 16px 10px; font-size:13px;
+    background: var(--card-bg); border:1px solid var(--border-color); border-radius:12px;
+    padding:12px; margin:0 16px 10px; font-size:0.85em; color: var(--text-color);
   }
   .fileCard img { width:100%; border-radius:8px; margin-top:6px; }
-  .fileCard .fileDate { color:#777; font-size:11px; margin-top:6px; }
+  .fileCard .fileDate { color: var(--text-muted); font-size:0.7em; margin-top:6px; }
   .uploadBox {
-    margin: 12px 16px; padding: 20px; border: 2px dashed #2a2a3d; border-radius: 12px;
-    text-align: center; color: #999; font-size: 14px;
+    margin: 12px 16px; padding: 20px; border: 2px dashed var(--border-color); border-radius: 12px;
+    text-align: center; color: var(--text-muted); font-size: 0.9em;
   }
+  .colorDot {
+    width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+  }
+  .colorDot.selected { border-color: var(--text-color); }
+  .colorRow { display: flex; gap: 10px; }
 </style>
 </head>
 <body>
@@ -253,6 +278,32 @@
   <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">⚙️</div><h1>Paramètres</h1></header>
   <div class="body-area" style="padding-bottom:30px;">
 
+    <div class="sectionTitle">🎨 Apparence</div>
+    <div class="settingRow">
+      <span>Mode</span>
+      <select id="themeSelect" onchange="setTheme(this.value)">
+        <option value="dark">Sombre</option>
+        <option value="light">Clair</option>
+      </select>
+    </div>
+    <div class="settingRow">
+      <span>Couleur d'accent</span>
+      <div class="colorRow">
+        <div class="colorDot" style="background:#7c3aed" onclick="setAccent('#7c3aed','#6d28d9')"></div>
+        <div class="colorDot" style="background:#2563eb" onclick="setAccent('#2563eb','#1d4ed8')"></div>
+        <div class="colorDot" style="background:#dc2626" onclick="setAccent('#dc2626','#b91c1c')"></div>
+        <div class="colorDot" style="background:#16a34a" onclick="setAccent('#16a34a','#15803d')"></div>
+      </div>
+    </div>
+    <div class="settingRow">
+      <span>Taille du texte</span>
+      <select id="fontSizeSelect" onchange="setFontSize(this.value)">
+        <option value="14px">Petit</option>
+        <option value="16px">Moyen</option>
+        <option value="19px">Grand</option>
+      </select>
+    </div>
+
     <div class="sectionTitle">👤 Compte</div>
     <div class="settingRow">
       <span>Nom d'utilisateur</span>
@@ -289,7 +340,7 @@
   <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><h1 id="soonTitle">Fonctionnalité</h1></header>
   <div class="body-area" style="align-items:center; justify-content:center; text-align:center;">
     <div style="font-size:50px;">🚧</div>
-    <p style="color:#999; margin-top:10px;">Bientôt disponible !</p>
+    <p style="color:var(--text-muted); margin-top:10px;">Bientôt disponible !</p>
   </div>
 </div>
 
@@ -329,6 +380,41 @@ async function sendChat() {
   } catch (e) { loading.textContent = 'Erreur de connexion'; }
 }
 document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendChat(); });
+
+function setTheme(mode) {
+  document.body.className = mode === 'light' ? 'light' : '';
+  localStorage.setItem('orlyne_theme', mode);
+}
+function setAccent(color, colorDark) {
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--accent-dark', colorDark);
+  localStorage.setItem('orlyne_accent', color);
+  localStorage.setItem('orlyne_accent_dark', colorDark);
+  document.querySelectorAll('.colorDot').forEach(d => d.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+function setFontSize(size) {
+  document.documentElement.style.setProperty('--font-size-base', size);
+  localStorage.setItem('orlyne_fontsize', size);
+}
+function loadAppearance() {
+  const theme = localStorage.getItem('orlyne_theme');
+  if (theme) {
+    document.getElementById('themeSelect').value = theme;
+    setTheme(theme);
+  }
+  const accent = localStorage.getItem('orlyne_accent');
+  const accentDark = localStorage.getItem('orlyne_accent_dark');
+  if (accent && accentDark) {
+    document.documentElement.style.setProperty('--accent', accent);
+    document.documentElement.style.setProperty('--accent-dark', accentDark);
+  }
+  const fontSize = localStorage.getItem('orlyne_fontsize');
+  if (fontSize) {
+    document.getElementById('fontSizeSelect').value = fontSize;
+    document.documentElement.style.setProperty('--font-size-base', fontSize);
+  }
+}
 
 async function sendCode() {
   const input = document.getElementById('codeInput');
@@ -622,13 +708,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('usernameInput').value = saved;
     document.getElementById('homeGreeting').textContent = 'Bonjour, ' + saved + ' 👋';
   }
+  loadAppearance();
 });
 
 function checkUpdate() {
   alert("Tu utilises la dernière version (1.0.0). Aucune mise à jour disponible.");
 }
 function showChangelog() {
-  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Paramètres");
+  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Apparence personnalisable\n- Paramètres");
 }
 
 function pickSupportNumber() {
@@ -662,10 +749,6 @@ function showPrivacy() {
   alert("Politique de confidentialité :\nTes conversations avec Orlyne IA restent privées et ne sont ni partagées ni vendues à des tiers. Elles sont utilisées uniquement pour te fournir des réponses pendant ton utilisation de l'application.");
 }
 </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-</script>
 
 </body>
+</html>

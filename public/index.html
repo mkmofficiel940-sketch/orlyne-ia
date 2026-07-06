@@ -165,6 +165,14 @@
   }
   .colorDot.selected { border-color: var(--text-color); }
   .colorRow { display: flex; gap: 10px; }
+
+  .statCard {
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+    padding: 18px; margin: 8px 16px; display: flex; align-items: center; gap: 14px;
+  }
+  .statIcon { font-size: 28px; }
+  .statValue { font-size: 1.3em; font-weight: bold; color: var(--accent); }
+  .statLabel { font-size: 0.8em; color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -274,6 +282,17 @@
   <button class="actionBtn" onclick="clearFiles()">Tout effacer</button>
 </div>
 
+<div class="screen" id="statsScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">📊</div><h1>Statistiques</h1></header>
+  <div class="body-area" style="padding-bottom:20px;">
+    <div class="statCard"><span class="statIcon">💬</span><div><div class="statValue" id="statMessages">0</div><div class="statLabel">Messages envoyés</div></div></div>
+    <div class="statCard"><span class="statIcon">⏱️</span><div><div class="statValue" id="statTime">0 min</div><div class="statLabel">Temps d'utilisation</div></div></div>
+    <div class="statCard"><span class="statIcon">🖼️</span><div><div class="statValue" id="statImages">0</div><div class="statLabel">Images générées</div></div></div>
+    <div class="statCard"><span class="statIcon">💻</span><div><div class="statValue" id="statCodes">0</div><div class="statLabel">Codes générés</div></div></div>
+  </div>
+  <button class="actionBtn" onclick="resetStats()">Réinitialiser les statistiques</button>
+</div>
+
 <div class="screen" id="settingsScreen">
   <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">⚙️</div><h1>Paramètres</h1></header>
   <div class="body-area" style="padding-bottom:30px;">
@@ -303,6 +322,9 @@
         <option value="19px">Grand</option>
       </select>
     </div>
+
+    <div class="sectionTitle">📊 Statistiques</div>
+    <div class="settingRow" onclick="showScreen('statsScreen'); loadStats();"><span>Voir mes statistiques</span><span class="arrow">›</span></div>
 
     <div class="sectionTitle">👤 Compte</div>
     <div class="settingRow">
@@ -366,6 +388,12 @@ function addMsg(containerId, text, sender) {
   return div;
 }
 
+function incrementStat(key) {
+  const stats = JSON.parse(localStorage.getItem('orlyne_stats') || '{}');
+  stats[key] = (stats[key] || 0) + 1;
+  localStorage.setItem('orlyne_stats', JSON.stringify(stats));
+}
+
 async function sendChat() {
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
@@ -377,6 +405,7 @@ async function sendChat() {
     const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
     const data = await res.json();
     loading.textContent = data.reply || 'Erreur';
+    incrementStat('messages');
   } catch (e) { loading.textContent = 'Erreur de connexion'; }
 }
 document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendChat(); });
@@ -416,6 +445,27 @@ function loadAppearance() {
   }
 }
 
+function loadStats() {
+  const stats = JSON.parse(localStorage.getItem('orlyne_stats') || '{}');
+  document.getElementById('statMessages').textContent = stats.messages || 0;
+  document.getElementById('statImages').textContent = stats.images || 0;
+  document.getElementById('statCodes').textContent = stats.codes || 0;
+  const totalSeconds = stats.timeSpent || 0;
+  const minutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const remMinutes = minutes % 60;
+  document.getElementById('statTime').textContent = hours > 0 ? (hours + 'h ' + remMinutes + 'min') : (minutes + ' min');
+}
+function resetStats() {
+  localStorage.removeItem('orlyne_stats');
+  loadStats();
+}
+setInterval(() => {
+  const stats = JSON.parse(localStorage.getItem('orlyne_stats') || '{}');
+  stats.timeSpent = (stats.timeSpent || 0) + 10;
+  localStorage.setItem('orlyne_stats', JSON.stringify(stats));
+}, 10000);
+
 async function sendCode() {
   const input = document.getElementById('codeInput');
   const message = input.value.trim();
@@ -436,6 +486,7 @@ async function sendCode() {
     card.className = 'codeCard';
     card.textContent = reply;
     container.appendChild(card);
+    incrementStat('codes');
     const btn = document.createElement('button');
     btn.className = 'smallBtn';
     btn.textContent = '📋 Copier le code';
@@ -543,6 +594,7 @@ async function sendImage() {
     container.appendChild(img);
     container.scrollTop = container.scrollHeight;
     saveFileRecord('image', url);
+    incrementStat('images');
   };
   img.onerror = () => { loading.textContent = 'Erreur de génération'; };
   img.src = url;
@@ -630,6 +682,7 @@ function toggleListening() {
       r.textContent = reply;
       results.appendChild(r);
       status.textContent = 'Appuie sur le micro pour reparler';
+      incrementStat('messages');
 
       const utter = new SpeechSynthesisUtterance(reply);
       utter.lang = 'fr-FR';
@@ -715,7 +768,7 @@ function checkUpdate() {
   alert("Tu utilises la dernière version (1.0.0). Aucune mise à jour disponible.");
 }
 function showChangelog() {
-  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Apparence personnalisable\n- Paramètres");
+  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Apparence personnalisable\n- Statistiques\n- Paramètres");
 }
 
 function pickSupportNumber() {

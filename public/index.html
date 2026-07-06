@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orlyne IA</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(180deg, #0d0d1a 0%, #14102a 100%);
+    color: white;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .screen { display: none; flex-direction: column; height: 100dvh; }
+  .screen.active { display: flex; }
+
+  #homeScreen { align-items: center; padding: 30px 20px 90px; overflow-y: auto; position: relative; }
+  .home-avatar {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; margin-top: 20px;
+    box-shadow: 0 0 30px rgba(124,58,237,0.5);
+  }
+  .home-title { margin-top: 16px; font-size: 22px; font-weight: bold; }
+  .home-sub { color: #999; margin-top: 6px; font-size: 14px; text-align: center; }
+  .grid { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
+  .grid-btn {
+    background: #1a1a2e; border: 1px solid #2a2a3d; border-radius: 16px;
+    padding: 18px 8px; display: flex; flex-direction: column; align-items: center;
+    gap: 8px; font-size: 13px; color: white;
+  }
+  .grid-btn .icon { font-size: 26px; }
+
+  .crownBtn {
+    position: absolute; top: 16px; right: 16px; font-size: 24px;
+    background: none; border: none;
+  }
+  .bottomNav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-around;
+    background: rgba(26,26,46,0.95); border-top: 1px solid #2a2a3d;
+    padding: 10px 0 14px;
+  }
+  .navItem {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; font-size: 11px; color: #888; background: none; border: none;
+  }
+  .navItem.active { color: #a78bfa; }
+  .navItem .navIcon { font-size: 20px; }
+
+  header {
+    background: rgba(26,26,46,0.9); padding: 16px; display: flex;
+    align-items: center; gap: 10px; border-bottom: 1px solid #2a2a3d;
+  }
+  .backBtn { font-size: 20px; background: none; border: none; color: white; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    display: flex; align-items: center; justify-content: center;
+  }
+  header h1 { font-size: 18px; }
+  header h1 span { color: #a78bfa; }
+
+  .body-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .welcome { text-align: center; margin-top: 40px; color: #888; }
+  .msg {
+    max-width: 85%; padding: 12px 16px; border-radius: 16px; line-height: 1.5;
+    white-space: pre-wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .user { align-self: flex-end; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-bottom-right-radius: 4px; }
+  .bot { align-self: flex-start; background: #1a1a2e; border: 1px solid #2a2a3d; border-bottom-left-radius: 4px; }
+
+  .inputArea { display: flex; padding: 12px; background: rgba(26,26,46,0.9); border-top: 1px solid #2a2a3d; gap: 8px; }
+  .textInput, textarea, select {
+    flex: 1; padding: 14px; border-radius: 16px; border: none;
+    background: #0d0d1a; color: white; font-size: 16px; outline: none;
+    font-family: inherit;
+  }
+  .roundInput { border-radius: 24px; }
+  .sendBtn {
+    padding: 0 22px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: white; border: none; border-radius: 24px; font-size: 16px; font-weight: bold;
+  }
+  .actionBtn {
+    margin: 12px 16px; padding: 14px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
+  }
+  .fieldLabel { padding: 12px 16px 0; font-size: 13px; color: #999; }
+  .langRow { display: flex; gap: 8px; padding: 12px 16px; }
+  #genImage { max-width: 100%; border-radius: 12px; margin-top: 10px; }
+  .loader { color: #999; font-style: italic; }
+  .codeCard {
+    background:#0d0d1a; border:1px solid #2a2a3d; border-radius:12px;
+    padding:14px; margin-top:6px; font-family:'Courier New', monospace;
+    font-size:13px; white-space:pre-wrap; overflow-x:auto;
+  }
+  .cardLabel { font-size:12px; color:#a78bfa; font-weight:bold; margin-top:10px; }
+  .smallBtn {
+    margin-top:8px; padding:8px 16px; background:#2a2a3d; color:#a78bfa;
+    border:none; border-radius:8px; font-size:13px; align-self:flex-start;
+  }
+
+  #voiceScreen { align-items: center; justify-content: center; }
+  .micBtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    border: none; color: white; font-size: 46px;
+    box-shadow: 0 0 30px rgba(124,58,237,0.5);
+  }
+  .micBtn.listening { background: linear-gradient(135deg, #ef4444, #b91c1c); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6);} 70% { box-shadow: 0 0 0 25px rgba(239,68,68,0);} 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0);} }
+  .voiceStatus { margin-top: 20px; color: #999; text-align: center; padding: 0 20px; }
+  .voiceTranscript { margin-top: 20px; padding: 14px 18px; background: #1a1a2e; border-radius: 16px; max-width: 85%; text-align: center; }
+  .voiceReply { margin-top: 14px; padding: 14px 18px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 16px; max-width: 85%; text-align: center; }
+
+  .sectionTitle { padding: 18px 16px 6px; font-size: 14px; color: #a78bfa; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+  .settingRow {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #1a1a2e; border: 1px solid #2a2a3d; border-radius: 12px;
+    padding: 14px 16px; margin: 6px 16px; font-size: 15px;
+  }
+  .settingRow input[type=text] {
+    background: #0d0d1a; border: none; color: white; padding: 8px 12px;
+    border-radius: 8px; font-size: 14px; width: 55%;
+  }
+  .settingRow .arrow { color: #666; }
+
+  .fileCard {
+    background:#1a1a2e; border:1px solid #2a2a3d; border-radius:12px;
+    padding:12px; margin:0 16px 10px; font-size:13px;
+  }
+  .fileCard img { width:100%; border-radius:8px; margin-top:6px; }
+  .fileCard .fileDate { color:#777; font-size:11px; margin-top:6px; }
+  .uploadBox {
+    margin: 12px 16px; padding: 20px; border: 2px dashed #2a2a3d; border-radius: 12px;
+    text-align: center; color: #999; font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="screen active" id="homeScreen">
+  <button class="crownBtn" onclick="alert('✨ Version Premium bientôt disponible !')">👑</button>
+  <div class="home-avatar">🤖</div>
+  <div class="home-title" id="homeGreeting">Bonjour ! 👋</div>
+  <div class="home-sub">Comment puis-je vous aider aujourd'hui ?</div>
+  <div class="grid">
+    <div class="grid-btn" onclick="showScreen('chatScreen')"><span class="icon">💬</span>Discussion</div>
+    <div class="grid-btn" onclick="showScreen('memoryScreen'); loadMemory();"><span class="icon">📖</span>Mémoire</div>
+    <div class="grid-btn" onclick="showScreen('codeScreen')"><span class="icon">💻</span>Code</div>
+    <div class="grid-btn" onclick="showScreen('translateScreen')"><span class="icon">🌐</span>Traduction</div>
+    <div class="grid-btn" onclick="showScreen('summaryScreen')"><span class="icon">📄</span>Résumé</div>
+    <div class="grid-btn" onclick="showScreen('imageScreen')"><span class="icon">🖼️</span>Images</div>
+    <div class="grid-btn" onclick="showScreen('voiceScreen')"><span class="icon">🎤</span>Voix</div>
+    <div class="grid-btn" onclick="showScreen('settingsScreen')"><span class="icon">⚙️</span>Paramètres</div>
+    <div class="grid-btn" onclick="showScreen('filesScreen'); loadFiles();"><span class="icon">🕒</span>Historique</div>
+  </div>
+  <div class="bottomNav">
+    <button class="navItem active"><span class="navIcon">🏠</span>Accueil</button>
+    <button class="navItem" onclick="showScreen('filesScreen'); loadFiles();"><span class="navIcon">📁</span>Fichiers</button>
+    <button class="navItem" onclick="showScreen('imageScreen')"><span class="navIcon">🛠️</span>Outils</button>
+    <button class="navItem" onclick="showScreen('settingsScreen')"><span class="navIcon">👤</span>Profil</button>
+  </div>
+</div>
+
+<div class="screen" id="chatScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">🤖</div><h1>ORLYNE <span>IA</span></h1></header>
+  <div class="body-area" id="chatBody"><div class="welcome">Bonjour ! Je suis Orlyne. Comment puis-je t'aider ?</div></div>
+  <div class="inputArea">
+    <input type="text" class="textInput roundInput" id="chatInput" placeholder="Tapez votre message...">
+    <button class="sendBtn" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<div class="screen" id="codeScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">💻</div><h1>Génération de <span>Code</span></h1></header>
+  <div class="body-area" id="codeBody"><div class="welcome">Décris le code dont tu as besoin.</div></div>
+  <div class="inputArea">
+    <input type="text" class="textInput roundInput" id="codeInput" placeholder="Ex: fonction Python factorielle...">
+    <button class="sendBtn" onclick="sendCode()">➤</button>
+  </div>
+</div>
+
+<div class="screen" id="translateScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">🌐</div><h1>Traduction</h1></header>
+  <div class="fieldLabel">Texte à traduire</div>
+  <textarea id="translateInput" rows="4" style="margin:12px 16px; width:calc(100% - 32px);" placeholder="Colle ou écris ton texte ici..."></textarea>
+  <div class="langRow">
+    <select id="targetLang" style="width:100%;">
+      <option value="anglais">Anglais</option>
+      <option value="français">Français</option>
+      <option value="espagnol">Espagnol</option>
+      <option value="arabe">Arabe</option>
+      <option value="haoussa">Haoussa</option>
+      <option value="allemand">Allemand</option>
+    </select>
+  </div>
+  <button class="actionBtn" onclick="sendTranslate()">Traduire</button>
+  <div class="body-area" id="translateBody"></div>
+</div>
+
+<div class="screen" id="summaryScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">📄</div><h1>Résumé de texte</h1></header>
+  <div class="fieldLabel">Colle ton texte long ici</div>
+  <textarea id="summaryInput" rows="6" style="margin:12px 16px; width:calc(100% - 32px);" placeholder="Colle l'article, le texte à résumer..."></textarea>
+  <div class="uploadBox" onclick="document.getElementById('fileInput').click()">
+    📤 Importer un fichier texte (.txt)
+  </div>
+  <input type="file" id="fileInput" accept=".txt" style="display:none;">
+  <button class="actionBtn" onclick="sendSummary()">Résumer</button>
+  <div class="body-area" id="summaryBody"></div>
+</div>
+
+<div class="screen" id="imageScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">🖼️</div><h1>Génération d'Images</h1></header>
+  <div class="body-area" id="imageBody"><div class="welcome">Décris l'image que tu veux créer.</div></div>
+  <div class="inputArea">
+    <input type="text" class="textInput roundInput" id="imageInput" placeholder="Ex: paysage futuriste au coucher du soleil">
+    <button class="sendBtn" onclick="sendImage()">➤</button>
+  </div>
+</div>
+
+<div class="screen" id="voiceScreen">
+  <header style="position:absolute; top:0; width:100%;"><button class="backBtn" onclick="stopListening(); showScreen('homeScreen')">←</button><div class="avatar">🎤</div><h1>Reconnaissance <span>Vocale</span></h1></header>
+  <button class="micBtn" id="micBtn" onclick="toggleListening()">🎤</button>
+  <div class="voiceStatus" id="voiceStatus">Appuie sur le micro et parle</div>
+  <div id="voiceResults"></div>
+</div>
+
+<div class="screen" id="memoryScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">📖</div><h1>Mémoire</h1></header>
+  <div class="body-area" id="memoryBody"><div class="welcome">Chargement...</div></div>
+  <button class="actionBtn" onclick="clearMemory()">Tout effacer</button>
+</div>
+
+<div class="screen" id="filesScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">📁</div><h1>Fichiers</h1></header>
+  <div class="body-area" style="padding-bottom:20px;">
+    <div class="sectionTitle">🖼️ Images générées</div>
+    <div id="filesImages"></div>
+    <div class="sectionTitle">📄 Résumés enregistrés</div>
+    <div id="filesSummaries"></div>
+  </div>
+  <button class="actionBtn" onclick="clearFiles()">Tout effacer</button>
+</div>
+
+<div class="screen" id="settingsScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><div class="avatar">⚙️</div><h1>Paramètres</h1></header>
+  <div class="body-area" style="padding-bottom:30px;">
+
+    <div class="sectionTitle">👤 Compte</div>
+    <div class="settingRow">
+      <span>Nom d'utilisateur</span>
+      <input type="text" id="usernameInput" placeholder="Ton nom">
+    </div>
+    <button class="actionBtn" onclick="saveUsername()">Enregistrer le nom</button>
+
+    <div class="sectionTitle">🛠️ Développeur</div>
+    <div class="settingRow" onclick="alert('Version actuelle : 1.0.0')"><span>Version de l'application</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="checkUpdate()"><span>Vérifier les mises à jour</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showChangelog()"><span>Journal des modifications</span><span class="arrow">›</span></div>
+
+    <div class="sectionTitle">📞 Support</div>
+    <div class="settingRow" onclick="contactSupport()"><span>Contacter le support</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showFAQ()"><span>FAQ</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="reportBug()"><span>Signaler un bug</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="sendFeedback()"><span>Envoyer un avis</span><span class="arrow">›</span></div>
+
+    <div class="sectionTitle">ℹ️ À propos</div>
+    <div class="settingRow" onclick="showAbout()"><span>À propos d'Orlyne IA</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showTerms()"><span>Conditions d'utilisation</span><span class="arrow">›</span></div>
+    <div class="settingRow" onclick="showPrivacy()"><span>Politique de confidentialité</span><span class="arrow">›</span></div>
+
+    <div class="sectionTitle">🗑️ Données</div>
+    <div class="settingRow" onclick="clearMemory(); alert('Conversations effacées');"><span>Effacer toutes les conversations</span><span class="arrow">›</span></div>
+
+    <div class="sectionTitle">📣 Partager</div>
+    <button class="actionBtn" onclick="inviteFriends()">📤 Inviter des amis</button>
+    <button class="actionBtn" onclick="openChannel()">💬 Rejoindre notre chaîne WhatsApp</button>
+  </div>
+</div>
+
+<div class="screen" id="soonScreen">
+  <header><button class="backBtn" onclick="showScreen('homeScreen')">←</button><h1 id="soonTitle">Fonctionnalité</h1></header>
+  <div class="body-area" style="align-items:center; justify-content:center; text-align:center;">
+    <div style="font-size:50px;">🚧</div>
+    <p style="color:#999; margin-top:10px;">Bientôt disponible !</p>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function openSoon(name) {
+  document.getElementById('soonTitle').textContent = name;
+  showScreen('soonScreen');
+}
+
+function addMsg(containerId, text, sender) {
+  const container = document.getElementById(containerId);
+  const welcome = container.querySelector('.welcome');
+  if (welcome) welcome.remove();
+  const div = document.createElement('div');
+  div.className = 'msg ' + sender;
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+  addMsg('chatBody', message, 'user');
+  input.value = '';
+  const loading = addMsg('chatBody', '...', 'bot');
+  try {
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+    const data = await res.json();
+    loading.textContent = data.reply || 'Erreur';
+  } catch (e) { loading.textContent = 'Erreur de connexion'; }
+}
+document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendChat(); });
+
+async function sendCode() {
+  const input = document.getElementById('codeInput');
+  const message = input.value.trim();
+  if (!message) return;
+  addMsg('codeBody', message, 'user');
+  input.value = '';
+  const container = document.getElementById('codeBody');
+  const loading = document.createElement('div');
+  loading.className = 'loader';
+  loading.textContent = 'Génération du code...';
+  container.appendChild(loading);
+  try {
+    const res = await fetch('/api/code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+    const data = await res.json();
+    loading.remove();
+    const reply = data.reply || 'Erreur';
+    const card = document.createElement('div');
+    card.className = 'codeCard';
+    card.textContent = reply;
+    container.appendChild(card);
+    const btn = document.createElement('button');
+    btn.className = 'smallBtn';
+    btn.textContent = '📋 Copier le code';
+    btn.onclick = () => { navigator.clipboard.writeText(reply); btn.textContent = '✅ Copié !'; setTimeout(() => btn.textContent = '📋 Copier le code', 2000); };
+    container.appendChild(btn);
+    container.scrollTop = container.scrollHeight;
+  } catch (e) { loading.textContent = 'Erreur de connexion'; }
+}
+document.getElementById('codeInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendCode(); });
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById('summaryInput').value = ev.target.result;
+  };
+  reader.readAsText(file);
+});
+
+function saveFileRecord(type, data) {
+  const key = 'orlyne_files';
+  const existing = JSON.parse(localStorage.getItem(key) || '[]');
+  existing.unshift({ type, data, date: new Date().toLocaleString('fr-FR') });
+  if (existing.length > 20) existing.pop();
+  localStorage.setItem(key, JSON.stringify(existing));
+}
+
+async function sendTranslate() {
+  const text = document.getElementById('translateInput').value.trim();
+  const targetLang = document.getElementById('targetLang').value;
+  if (!text) return;
+  const container = document.getElementById('translateBody');
+  container.innerHTML = '';
+  const label = document.createElement('div');
+  label.className = 'cardLabel';
+  label.textContent = targetLang.charAt(0).toUpperCase() + targetLang.slice(1) + ' :';
+  container.appendChild(label);
+  const loading = document.createElement('div');
+  loading.className = 'loader';
+  loading.textContent = 'Traduction en cours...';
+  container.appendChild(loading);
+  try {
+    const res = await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, targetLang }) });
+    const data = await res.json();
+    loading.remove();
+    const card = document.createElement('div');
+    card.className = 'msg bot';
+    card.textContent = data.reply || 'Erreur';
+    container.appendChild(card);
+  } catch (e) { loading.textContent = 'Erreur de connexion'; }
+}
+
+async function sendSummary() {
+  const text = document.getElementById('summaryInput').value.trim();
+  if (!text) return;
+  const container = document.getElementById('summaryBody');
+  container.innerHTML = '';
+  const loading = document.createElement('div');
+  loading.className = 'loader';
+  loading.textContent = 'Résumé en cours...';
+  container.appendChild(loading);
+  try {
+    const res = await fetch('/api/summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+    const data = await res.json();
+    loading.remove();
+    const reply = data.reply || 'Erreur';
+    const card = document.createElement('div');
+    card.className = 'msg bot';
+    card.textContent = reply;
+    container.appendChild(card);
+    saveFileRecord('summary', reply);
+    const btn = document.createElement('button');
+    btn.className = 'smallBtn';
+    btn.textContent = '⬇️ Télécharger le résumé';
+    btn.onclick = () => {
+      const blob = new Blob([reply], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'resume.txt'; a.click();
+      URL.revokeObjectURL(url);
+    };
+    container.appendChild(btn);
+  } catch (e) { loading.textContent = 'Erreur de connexion'; }
+}
+
+async function sendImage() {
+  const input = document.getElementById('imageInput');
+  const prompt = input.value.trim();
+  if (!prompt) return;
+  addMsg('imageBody', prompt, 'user');
+  input.value = '';
+  const container = document.getElementById('imageBody');
+  const loading = document.createElement('div');
+  loading.className = 'loader';
+  loading.textContent = 'Génération de l\'image...';
+  container.appendChild(loading);
+  container.scrollTop = container.scrollHeight;
+
+  const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt);
+  const img = new Image();
+  img.onload = () => {
+    loading.remove();
+    img.id = 'genImage';
+    container.appendChild(img);
+    container.scrollTop = container.scrollHeight;
+    saveFileRecord('image', url);
+  };
+  img.onerror = () => { loading.textContent = 'Erreur de génération'; };
+  img.src = url;
+}
+document.getElementById('imageInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendImage(); });
+
+function loadFiles() {
+  const files = JSON.parse(localStorage.getItem('orlyne_files') || '[]');
+  const imagesContainer = document.getElementById('filesImages');
+  const summariesContainer = document.getElementById('filesSummaries');
+  imagesContainer.innerHTML = '';
+  summariesContainer.innerHTML = '';
+
+  const images = files.filter(f => f.type === 'image');
+  const summaries = files.filter(f => f.type === 'summary');
+
+  if (images.length === 0) imagesContainer.innerHTML = '<div class="welcome" style="margin-top:10px;">Aucune image générée.</div>';
+  images.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'fileCard';
+    card.innerHTML = '<img src="' + f.data + '"><div class="fileDate">' + f.date + '</div>';
+    imagesContainer.appendChild(card);
+  });
+
+  if (summaries.length === 0) summariesContainer.innerHTML = '<div class="welcome" style="margin-top:10px;">Aucun résumé enregistré.</div>';
+  summaries.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'fileCard';
+    const shortText = f.data.length > 150 ? f.data.slice(0, 150) + '...' : f.data;
+    card.innerHTML = '<div>' + shortText + '</div><div class="fileDate">' + f.date + '</div>';
+    summariesContainer.appendChild(card);
+  });
+}
+
+function clearFiles() {
+  localStorage.removeItem('orlyne_files');
+  loadFiles();
+}
+
+let recognition = null;
+let listening = false;
+
+function getRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return null;
+  const r = new SpeechRecognition();
+  r.lang = 'fr-FR';
+  r.continuous = false;
+  r.interimResults = false;
+  return r;
+}
+
+function toggleListening() {
+  if (listening) { stopListening(); return; }
+  recognition = getRecognition();
+  if (!recognition) {
+    document.getElementById('voiceStatus').textContent = "La reconnaissance vocale n'est pas supportée sur ce navigateur. Essaie avec Chrome.";
+    return;
+  }
+  const micBtn = document.getElementById('micBtn');
+  const status = document.getElementById('voiceStatus');
+  const results = document.getElementById('voiceResults');
+  results.innerHTML = '';
+
+  recognition.onstart = () => {
+    listening = true;
+    micBtn.classList.add('listening');
+    status.textContent = "Je t'écoute...";
+  };
+
+  recognition.onresult = async (event) => {
+    const transcript = event.results[0][0].transcript;
+    const t = document.createElement('div');
+    t.className = 'voiceTranscript';
+    t.textContent = transcript;
+    results.appendChild(t);
+    status.textContent = 'Orlyne réfléchit...';
+
+    try {
+      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: transcript }) });
+      const data = await res.json();
+      const reply = data.reply || 'Erreur de réponse';
+      const r = document.createElement('div');
+      r.className = 'voiceReply';
+      r.textContent = reply;
+      results.appendChild(r);
+      status.textContent = 'Appuie sur le micro pour reparler';
+
+      const utter = new SpeechSynthesisUtterance(reply);
+      utter.lang = 'fr-FR';
+      speechSynthesis.speak(utter);
+    } catch (e) {
+      status.textContent = 'Erreur de connexion au serveur';
+    }
+  };
+
+  recognition.onerror = (e) => {
+    status.textContent = 'Erreur micro : ' + e.error;
+    stopListening();
+  };
+
+  recognition.onend = () => { stopListening(); };
+
+  recognition.start();
+}
+
+function stopListening() {
+  listening = false;
+  document.getElementById('micBtn').classList.remove('listening');
+  if (recognition) { try { recognition.stop(); } catch(e){} }
+}
+
+async function loadMemory() {
+  const container = document.getElementById('memoryBody');
+  container.innerHTML = '<div class="welcome">Chargement...</div>';
+  try {
+    const res = await fetch('/api/history');
+    const data = await res.json();
+    container.innerHTML = '';
+    if (!data.history || data.history.length === 0) {
+      container.innerHTML = '<div class="welcome">Aucune conversation pour le moment.</div>';
+      return;
+    }
+    data.history.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'msg ' + (m.role === 'user' ? 'user' : 'bot');
+      div.textContent = m.content;
+      container.appendChild(div);
+    });
+  } catch (e) {
+    container.innerHTML = '<div class="welcome">Erreur de chargement.</div>';
+  }
+}
+
+async function clearMemory() {
+  await fetch('/api/reset', { method: 'POST' });
+  loadMemory();
+}
+
+function inviteFriends() {
+  const text = "Découvre Orlyne IA, mon assistante intelligente ! 🤖";
+  if (navigator.share) {
+    navigator.share({ title: 'Orlyne IA', text });
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+}
+
+function openChannel() {
+  window.open('https://whatsapp.com/channel/0029VbAwnNUBvvslMVmnNU1C', '_blank');
+}
+
+function saveUsername() {
+  const name = document.getElementById('usernameInput').value.trim();
+  if (!name) return;
+  localStorage.setItem('orlyne_username', name);
+  document.getElementById('homeGreeting').textContent = 'Bonjour, ' + name + ' 👋';
+  alert('Nom enregistré : ' + name);
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('orlyne_username');
+  if (saved) {
+    document.getElementById('usernameInput').value = saved;
+    document.getElementById('homeGreeting').textContent = 'Bonjour, ' + saved + ' 👋';
+  }
+});
+
+function checkUpdate() {
+  alert("Tu utilises la dernière version (1.0.0). Aucune mise à jour disponible.");
+}
+function showChangelog() {
+  alert("Changelog v1.0.0 :\n- Discussion avec mémoire\n- Génération de code\n- Traduction\n- Résumé de texte\n- Génération d'images\n- Reconnaissance vocale\n- Fichiers\n- Paramètres");
+}
+
+function pickSupportNumber() {
+  const choice = confirm("Contacter le support principal ?\n\nOK = Support 1\nAnnuler = Support 2");
+  return choice ? '22770082880' : '22798834540';
+}
+
+function contactSupport() {
+  const number = pickSupportNumber();
+  window.open('https://wa.me/' + number + '?text=' + encodeURIComponent("Bonjour, j'ai besoin d'aide avec Orlyne IA"), '_blank');
+}
+function showFAQ() {
+  alert("FAQ :\n\nQ: Orlyne fonctionne-t-elle hors ligne ?\nR: Non, une connexion internet est nécessaire.\n\nQ: Mes conversations sont-elles privées ?\nR: Elles restent sur cette session, non partagées.\n\nQ: Comment effacer mon historique ?\nR: Va dans Paramètres > Effacer toutes les conversations.");
+}
+function reportBug() {
+  const number = pickSupportNumber();
+  window.open('https://wa.me/' + number + '?text=' + encodeURIComponent("Bonjour, je souhaite signaler un bug sur Orlyne IA : "), '_blank');
+}
+function sendFeedback() {
+  const number = pickSupportNumber();
+  window.open('https://wa.me/' + number + '?text=' + encodeURIComponent("Bonjour, voici mon avis sur Orlyne IA : "), '_blank');
+}
+
+function showAbout() {
+  alert("Orlyne IA — v1.0.0\nCréée par Aboubakary Moukimou\nAssistante intelligente tout-en-un 🤖");
+}
+function showTerms() {
+  alert("Conditions d'utilisation :\nOrlyne IA est fournie telle quelle, à des fins personnelles. L'utilisateur est responsable du contenu échangé avec l'IA.");
+}
+function showPrivacy() {
+  alert("Politique de confidentialité :\nTes conversations avec Orlyne IA restent privées et ne sont ni partagées ni vendues à des tiers. Elles sont utilisées uniquement pour te fournir des réponses pendant ton utilisation de l'application.");
+}
+</script>
+
+</body>
+</html>

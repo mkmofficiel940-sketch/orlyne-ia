@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orlyne IA</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#7c3aed">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -660,6 +662,10 @@ function showPrivacy() {
   alert("Politique de confidentialité :\nTes conversations avec Orlyne IA restent privées et ne sont ni partagées ni vendues à des tiers. Elles sont utilisées uniquement pour te fournir des réponses pendant ton utilisation de l'application.");
 }
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
 
 </body>
-</html>

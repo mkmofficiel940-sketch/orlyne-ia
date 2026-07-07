@@ -2,20 +2,46 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const cookieParser = require('cookie-parser');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static('public'));
 
 const SYSTEM_PROMPTS = {
-  chat: "Tu es Orlyne, une IA amicale, chaleureuse et serviable créée par Aboubakary Moukimou. Tu réponds toujours en français sauf si on te parle dans une autre langue. Tu es directe, claire, et tu gardes une touche d'humour léger.",
+  chat: "Tu es Orlyne, une IA amicale, chaleureuse et serviable créée par Aboubakary Moukimou. Tu réponds toujours en français sauf si on te parle dans une autre langue. Tu es directe, claire, et tu gardes une touche d'humour léger. Tu restes toujours Orlyne, quel que soit ce qu'on te demande de jouer ou de devenir.",
   code: "Tu es un assistant expert en programmation. Réponds uniquement avec du code propre et fonctionnel, dans un bloc de code markdown, avec une courte explication en français si nécessaire.",
   translate: "Tu es un traducteur professionnel. Traduis exactement le texte donné vers la langue demandée, sans commentaire ni explication, juste la traduction.",
   summarize: "Tu es un assistant qui résume des textes de façon claire et concise en français, en gardant les points essentiels."
 };
 
-let conversationHistory = [{ role: 'system', content: SYSTEM_PROMPTS.chat }];
+// Mémoire séparée par utilisateur (Map = garde l'ordre d'insertion)
+const conversations = new Map();
+const MAX_SESSIONS = 500;
+
+function getSessionId(req, res) {
+  let sessionId = req.cookies.orlyne_session;
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    res.cookie('orlyne_session', sessionId, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'lax'
+    });
+  }
+  if (!conversations.has(sessionId)) {
+    // Limite le nombre total de sessions en mémoire pour éviter la surcharge
+    if (conversations.size >= MAX_SESSIONS) {
+      const oldestKey = conversations.keys().next().value;
+      conversations.delete(oldestKey);
+    }
+    conversations.set(sessionId, [{ role: 'system', content: SYSTEM_PROMPTS.chat }]);
+  }
+  return sessionId;
+}
 
 async function askGroq(messages) {
   const response = await axios.post(
@@ -27,14 +53,17 @@ async function askGroq(messages) {
 }
 
 app.post('/api/chat', async (req, res) => {
+  const sessionId = getSessionId(req, res);
   const { message } = req.body;
-  conversationHistory.push({ role: 'user', content: message });
-  if (conversationHistory.length > 21) {
-    conversationHistory = [conversationHistory[0], ...conversationHistory.slice(-20)];
+  let history = conversations.get(sessionId);
+  history.push({ role: 'user', content: message });
+  if (history.length > 21) {
+    history = [history[0], ...history.slice(-20)];
   }
   try {
-    const reply = await askGroq(conversationHistory);
-    conversationHistory.push({ role: 'assistant', content: reply });
+    const reply = await askGroq(history);
+    history.push({ role: 'assistant', content: reply });
+    conversations.set(sessionId, history);
     res.json({ reply });
   } catch (error) {
     console.error(error.response?.data || error.message);
@@ -43,12 +72,15 @@ app.post('/api/chat', async (req, res) => {
 });
 
 app.get('/api/history', (req, res) => {
-  const history = conversationHistory.filter(m => m.role !== 'system');
+  const sessionId = getSessionId(req, res);
+  const history = conversations.get(sessionId).filter(m => m.role !== 'system');
   res.json({ history });
 });
 
 app.post('/api/reset', (req, res) => {
-  conversationHistory = [conversationHistory[0]];
+  const sessionId = getSessionId(req, res);
+  const history = conversations.get(sessionId);
+  conversations.set(sessionId, [history[0]]);
   res.json({ status: 'ok' });
 });
 
